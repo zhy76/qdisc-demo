@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "pkt_sched.h": "c",
+        "vmlinux.h": "c"
+    }
+}
