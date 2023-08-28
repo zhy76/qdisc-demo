@@ -21,12 +21,12 @@ func main() {
 	}
 	defer objs.Close()
 
-	tpEnqueue, err := link.Kprobe("pfifo_enqueue", objs.KprobePfifoEnqueue, nil)
+	tpDequeue, err := link.Kprobe("sch_direct_xmit", objs.KprobeSchDirectXmit, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer tpEnqueue.Close()
+	defer tpDequeue.Close()
 	// tpDequeue, err := link.Tracepoint("qdisc", "qdisc_dequeue", objs.QdiscDequeue, nil)
 	// if err != nil {
 	// 	log.Fatal(err)

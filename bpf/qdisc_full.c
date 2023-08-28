@@ -5,18 +5,18 @@
 #include "bpf_tracing.h"
 #include "bpf_endian.h"
 
-// struct trace_event_raw_qdisc_enqueue {
-//     unsigned long unused;
+struct trace_event_raw_qdisc_dequeue {
+    // unsigned long unused;
 
-//     struct Qdisc * qdisc;
-//     const struct netdev_queue * txq;
-//     int packets;
-//     void * skbaddr;
-//     int ifindex;
-//     u32 handle;
-//     u32 parent;
-//     unsigned long txq_state;
-// };
+    struct Qdisc * qdisc;
+    const struct netdev_queue * txq;
+    int packets;
+    void * skbaddr;
+    int ifindex;
+    u32 handle;
+    u32 parent;
+    unsigned long txq_state;
+};
 
 // SEC("tracepoint/qdisc/qdisc_enqueue")
 // int qdisc_enqueue(struct trace_event_raw_qdisc_enqueue *ctx) {
@@ -66,7 +66,7 @@
 // }
 
 // SEC("tracepoint/qdisc/qdisc_dequeue")
-// int qdisc_dequeue(struct trace_event_raw_qdisc_enqueue *ctx) {
+// int qdisc_dequeue(struct trace_event_raw_qdisc_dequeue *ctx) {
 //     struct trace_event_raw_qdisc_enqueue args = {};
 //     if (bpf_probe_read(&args, sizeof(args), ctx) < 0) {
 //         return 0;
@@ -78,6 +78,10 @@
 //     u32 parent;
 //     u32 limit;
 //     __u32 qlen;
+//     __u32 backlog;
+//     __u32 drops;
+//     __u32 requeues;
+//     __u32 overlimits;
 
 //     // if(bpf_probe_read(&common_pid, sizeof(common_pid), &args.common_pid)<0) {
 //     //     return 0;
@@ -102,13 +106,26 @@
 //     if (bpf_probe_read(&limit, sizeof(limit), &args.qdisc->limit)<0) {
 //         return 0;
 //     }
-//     if (bpf_probe_read(&qlen, sizeof(qlen), &args.qdisc->q.qlen)<0) {
+//     if (bpf_probe_read(&qlen, sizeof(qlen), &args.qdisc->qstats.qlen)<0) {
 //         return 0;
 //     }
-//     __bpf_printk("dequeue ifindex=%d qdisc handle=0x%X\n", ifindex, handle);
-//     __bpf_printk("dequeue parent=0x%X skbaddr=%px\n", parent, skbaddr);
+//     if (bpf_probe_read(&backlog, sizeof(backlog), &args.qdisc->qstats.backlog)<0){
+//         return 0;
+//     }
+//     if (bpf_probe_read(&drops, sizeof(drops), &args.qdisc->qstats.drops)<0){
+//         return 0;
+//     }
+//     if (bpf_probe_read(&requeues, sizeof(requeues), &args.qdisc->qstats.requeues)<0){
+//         return 0;
+//     }
+//     if (bpf_probe_read(&overlimits, sizeof(overlimits), &args.qdisc->qstats.overlimits)<0) {
+//         return 0;
+//     }
+//     // __bpf_printk("dequeue ifindex=%d qdisc handle=0x%X\n", ifindex, handle);
+//     // __bpf_printk("dequeue parent=0x%X skbaddr=%px\n", parent, skbaddr);
 //     __bpf_printk("dequeue: qdisc limit=%u qlen=%u\n", limit, qlen);
-
+//     __bpf_printk("dequeue: qdisc backlog=%u drops=%u\n", backlog, drops);
+//     __bpf_printk("dequeue: qdisc requeues=%u overlimits=%u\n", requeues, overlimits);
 //     return 0;
 // }
 
@@ -165,6 +182,10 @@ int kprobe__sch_direct_xmit(struct pt_regs *ctx)
     u32 parent;
     u32 limit;
     __u32 qlen;
+    __u32 backlog;
+    __u32 drops;
+    __u32 requeues;
+    __u32 overlimits;
 
     // if(bpf_probe_read(&skbaddr, sizeof(skbaddr), sch.skbaddr)<0) {
     //     return 0;
@@ -185,12 +206,27 @@ int kprobe__sch_direct_xmit(struct pt_regs *ctx)
     if (bpf_probe_read(&limit, sizeof(limit), &(sch->limit))<0) {
         return 0;
     }
-    if (bpf_probe_read(&qlen, sizeof(qlen), &(sch->q.qlen))<0) {
+    if (bpf_probe_read(&qlen, sizeof(qlen), &(sch->qstats.qlen))<0){
+        return 0;
+    }
+    if (bpf_probe_read(&backlog, sizeof(backlog), &(sch->qstats.backlog))<0){
+        return 0;
+    }
+    if (bpf_probe_read(&drops, sizeof(drops), &(sch->qstats.drops))<0){
+        return 0;
+    }
+    if (bpf_probe_read(&requeues, sizeof(requeues), &(sch->qstats.requeues))<0){
+        return 0;
+    }
+    if (bpf_probe_read(&overlimits, sizeof(overlimits), &(sch->qstats.overlimits))<0) {
         return 0;
     }
     // __bpf_printk("dequeue ifindex=%d qdisc handle=0x%X\n", ifindex, handle);
     // __bpf_printk("dequeue parent=0x%X skbaddr=%px\n", parent, skbaddr);
     __bpf_printk("kprobe dequeue: qdisc limit=%u qlen=%u\n", limit, qlen);
+    __bpf_printk("kprobe dequeue: qdisc backlog=%u drops=%u\n", backlog, drops);
+    __bpf_printk("kprobe dequeue: qdisc requeues=%u overlimits=%u\n", requeues, overlimits);
+
     return 0;
 }
 
