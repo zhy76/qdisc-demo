@@ -4,7 +4,11 @@
         "vmlinux.h": "c",
         "bpf_endian.h": "c",
         "bpf.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "string.h": "c",
+        "module.h": "c",
+        "kernel.h": "c",
+        "errno.h": "c"
     },
     "cmake.sourceDirectory": "/home/lz/myCode/qdisc-demo/bpf"
 }

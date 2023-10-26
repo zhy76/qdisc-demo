@@ -16,18 +16,18 @@ import (
 func main() {
 	stopper := make(chan os.Signal, 1)
 	signal.Notify(stopper, os.Interrupt, syscall.SIGTERM)
-	pfifoObjs := PfifoObjects{}
-	if err := LoadPfifoObjects(&pfifoObjs, nil); err != nil {
-		log.Fatalf("loading objects: %v", err)
-	}
-	defer pfifoObjs.Close()
+	// pfifoObjs := PfifoObjects{}
+	// if err := LoadPfifoObjects(&pfifoObjs, nil); err != nil {
+	// 	log.Fatalf("loading objects: %v", err)
+	// }
+	// defer pfifoObjs.Close()
 
-	pfifoEnqueue, err := link.Kprobe("pfifo_enqueue", pfifoObjs.KprobePfifoEnqueue, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// pfifoEnqueue, err := link.Kprobe("pfifo_enqueue", pfifoObjs.KprobePfifoEnqueue, nil)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	defer pfifoEnqueue.Close()
+	// defer pfifoEnqueue.Close()
 
 	htbObjs := HtbObjects{}
 	if err := LoadHtbObjects(&htbObjs, nil); err != nil {
@@ -35,7 +35,7 @@ func main() {
 	}
 	defer htbObjs.Close()
 
-	htbEnqueue, err := link.Kprobe("htb_enqueue", htbObjs.KprobeHtbEnqueue, nil)
+	htbEnqueue, err := link.Tracepoint("qdisc", "qdisc_dequeue", htbObjs.QdiscEnqueue, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
