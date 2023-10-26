@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "pkt_sched.h": "c",
-        "vmlinux.h": "c"
-    }
+        "vmlinux.h": "c",
+        "bpf_endian.h": "c",
+        "bpf.h": "c",
+        "types.h": "c"
+    },
+    "cmake.sourceDirectory": "/home/lz/myCode/qdisc-demo/bpf"
 }
