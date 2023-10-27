@@ -35,7 +35,7 @@ func main() {
 	}
 	defer htbObjs.Close()
 
-	htbEnqueue, err := link.Tracepoint("qdisc", "qdisc_dequeue", htbObjs.QdiscEnqueue, nil)
+	htbEnqueue, err := link.Kprobe("htb_enqueue", htbObjs.KprobeHtbEnqueue, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -53,7 +53,7 @@ type HtbSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type HtbProgramSpecs struct {
-	QdiscEnqueue *ebpf.ProgramSpec `ebpf:"qdisc_enqueue"`
+	KprobeHtbEnqueue *ebpf.ProgramSpec `ebpf:"kprobe__htb_enqueue"`
 }
 
 // HtbMapSpecs contains maps before they are loaded into the kernel.
@@ -91,12 +91,12 @@ func (m *HtbMaps) Close() error {
 //
 // It can be passed to LoadHtbObjects or ebpf.CollectionSpec.LoadAndAssign.
 type HtbPrograms struct {
-	QdiscEnqueue *ebpf.Program `ebpf:"qdisc_enqueue"`
+	KprobeHtbEnqueue *ebpf.Program `ebpf:"kprobe__htb_enqueue"`
 }
 
 func (p *HtbPrograms) Close() error {
 	return _HtbClose(
-		p.QdiscEnqueue,
+		p.KprobeHtbEnqueue,
 	)
 }
 
